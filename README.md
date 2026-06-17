@@ -69,7 +69,7 @@ cd smart-queue-system
 ```
 
 2. **إنشاء وتفعيل البيئة الافتراضية (Virtual Environment):**
-   ```bash
+```bash
 python -m venv venv
 # لنظام ويندوز:
 venv\Scripts\activate
@@ -81,7 +81,6 @@ source venv/bin/activate
 3. **تثبيت المكتبات الاعتمادية (Install Dependencies):**
 ```bash
 
-```
 
 
 
@@ -90,7 +89,7 @@ pip install -r requirements.txt
 ```
 
 4. **تجهيز قاعدة البيانات (Database Migrations):**
-   ```bash
+```bash
 python manage.py makemigrations
 python manage.py migrate
 
@@ -99,7 +98,7 @@ python manage.py migrate
 5. **إنشاء حساب المسؤول/الآدمن (Superuser):**
 ```bash
 
-```
+
 
 
 
@@ -108,7 +107,7 @@ python manage.py createsuperuser
 ```
 
 6. **إطلاق السيرفر (Run Server):**
-   ```bash
+```bash
 python manage.py runserver
 
 ```
