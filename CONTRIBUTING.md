@@ -52,4 +52,4 @@ First off, thank you for considering contributing to this project! Your contribu
 يرجى التعامل باحترام ومهنية مع جميع أعضاء المجتمع والمساهمين في الـ Issues والـ Pull Requests. هدفنا هو بناء بيئة تشجيعية ومرحبة بالجميع.
 
 نتطلع لرؤية مساهماتكم الإبداعية! 🚀
-Looking forward to your awesome contributions! 🚀
+Looking forward to your awesome contributions! 🚀 
