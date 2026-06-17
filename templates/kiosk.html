@@ -1,0 +1,157 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<style>
+    /* الحل الجذري والنهائي لمشكلة الطبقة السوداء (image_a2f55a.jpg) */
+    .modal {
+        z-index: 9999 !important;
+    }
+    .modal-backdrop {
+        display: none !important; /* إخفاء الطبقة السوداء الافتراضية تماماً لأنها تسبب المشكلة */
+    }
+    
+    /* استبدال الخلفية بخلفية مخصصة داخل المودال نفسه لضمان عدم التداخل */
+    .modal.show {
+        background: rgba(0, 0, 0, 0.6) !important;
+        backdrop-filter: blur(4px);
+    }
+
+    /* تحسين البطاقات الإحصائية */
+    .stat-card {
+        background: rgba(255, 255, 255, 0.9);
+        border-radius: 20px;
+        border: none;
+        padding: 25px;
+        transition: transform 0.3s ease;
+        box-shadow: 0 10px 30px rgba(0,0,0,0.05);
+    }
+    .stat-card.waiting { border-right: 6px solid var(--primary-color); }
+    .stat-card.served { border-right: 6px solid var(--secondary-color); }
+    .stat-value { font-size: 2.5rem; font-weight: 800; color: var(--primary-color); }
+
+    /* تصميم كروت الخدمات */
+    .service-card {
+        background: white;
+        border-radius: 24px;
+        border: 1px solid rgba(0,0,0,0.05);
+        transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+        cursor: pointer;
+        padding: 2rem;
+        height: 100%;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        text-align: center;
+    }
+    .service-card:hover {
+        transform: translateY(-10px);
+        box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+    }
+    .service-icon-box {
+        width: 85px; height: 85px;
+        background: #f8fafc;
+        border-radius: 22px;
+        display: flex; align-items: center; justify-content: center;
+        margin-bottom: 1.5rem; color: var(--primary-color);
+        font-size: 1.8rem; font-weight: 800; border: 1px solid #e2e8f0;
+    }
+
+    /* تنسيق المودال الاحترافي */
+    .modal-content-custom {
+        border-radius: 25px;
+        border: none;
+        background: #ffffff !important;
+        box-shadow: 0 25px 50px rgba(0,0,0,0.4);
+        overflow: hidden;
+    }
+
+    .counter-item {
+        display: flex; align-items: center; justify-content: space-between;
+        padding: 18px; margin-bottom: 12px;
+        border: 2px solid #f0f2f5; border-radius: 15px;
+        text-decoration: none !important; transition: all 0.3s ease;
+        background: #fff; color: #333;
+    }
+    .counter-item:hover {
+        border-color: var(--primary-color);
+        background: rgba(0, 86, 179, 0.05);
+        transform: scale(1.02);
+    }
+    .btn-action-kiosk {
+        background: var(--primary-color); color: white;
+        padding: 8px 20px; border-radius: 8px; font-weight: bold;
+    }
+</style>
+
+<!-- الإحصائيات -->
+<div class="row g-4 mb-5">
+    <div class="col-md-6 animate__animated animate__fadeInRight">
+        <div class="stat-card waiting">
+            <div class="text-muted fw-600 mb-1">إجمالي المنتظرين حالياً</div>
+            <div class="stat-value">{{ total_waiting }}</div>
+        </div>
+    </div>
+    <div class="col-md-6 animate__animated animate__fadeInLeft">
+        <div class="stat-card served">
+            <div class="text-muted fw-600 mb-1">عملاء تم خدمتهم اليوم</div>
+            <div class="stat-value" style="color: var(--secondary-color);">{{ total_served }}</div>
+        </div>
+    </div>
+</div>
+
+<div class="text-center py-4 mb-5">
+    <h1 class="fw-bold" style="color: var(--primary-color); font-size: 2.5rem;">يرجى اختيار الخدمة</h1>
+    <div class="mx-auto" style="width: 60px; height: 5px; background: var(--secondary-color); border-radius: 10px;"></div>
+</div>
+
+<!-- الخدمات -->
+<div class="row g-4 justify-content-center">
+    {% for service in services %}
+    <div class="col-md-4 animate__animated animate__zoomIn">
+        <div class="service-card shadow-sm" data-bs-toggle="modal" data-bs-target="#serviceModal{{ service.id }}">
+            <div class="service-icon-box">{{ service.prefix }}</div>
+            <h3 class="fw-bold mb-3">{{ service.name }}</h3>
+            <button class="btn-main w-100">سحب تذكرة</button>
+        </div>
+    </div>
+    {% endfor %}
+</div>
+
+<!-- المودالات -->
+{% for service in services %}
+<div class="modal fade" id="serviceModal{{ service.id }}" tabindex="-1" aria-hidden="true" data-bs-backdrop="false">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content modal-content-custom shadow-lg">
+            <div class="modal-header border-0 p-4 pb-0">
+                <h4 class="modal-title fw-bold text-dark">اختر الشباك المناسب</h4>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body p-4">
+                <div class="d-flex align-items-center mb-4">
+                    <span class="badge bg-dark px-3 py-2">خدمة: {{ service.name }}</span>
+                </div>
+                <div class="list-group list-group-flush">
+                    {% for counter in counters %}
+                        {% if service in counter.services.all %}
+                        <a href="{% url 'issue_ticket' service.id counter.id %}" class="counter-item">
+                            <div class="d-flex align-items-center">
+                                <div class="counter-icon-box" style="width:40px; height:40px; margin-left:10px;">
+                                    <i class="fas fa-desktop"></i>
+                                </div>
+                                <div>
+                                    <div class="fw-bold text-dark">شباك رقم {{ counter.number }}</div>
+                                    <div class="small text-muted">الموظف: {{ counter.staff_member.username }}</div>
+                                </div>
+                            </div>
+                            <div class="btn-action-kiosk">اختيار</div>
+                        </a>
+                        {% endif %}
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endfor %}
+
+{% endblock %}
